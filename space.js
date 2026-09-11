@@ -217,23 +217,21 @@
      Cosmic Background & Twinkling Stars
      -------------------------------------------------------------------------- */
   function setupCosmicBackground() {
-    const loader = new THREE.TextureLoader();
-
-    // Deep space Milky Way skybox
-    loader.load('assets/textures/stars.jpg', function (starsTexture) {
-      starsTexture.wrapS = THREE.RepeatWrapping;
-      starsTexture.wrapT = THREE.RepeatWrapping;
-      starsTexture.repeat.set(2, 2);
-
-      const skyGeo = new THREE.SphereGeometry(1400, 32, 32);
-      const skyMat = new THREE.MeshBasicMaterial({
-        map: starsTexture,
-        side: THREE.BackSide,
-        color: 0x94a3b8
-      });
-      const skyMesh = new THREE.Mesh(skyGeo, skyMat);
-      scene.add(skyMesh);
+    // Deep space Milky Way skybox with resilient candidate loader
+    const starsTex = loadResilientTexture('stars.jpg', '2k%20stars%20+%20milkyway.jpg', function(tex) {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
     });
+
+    const skyGeo = new THREE.SphereGeometry(1400, 32, 32);
+    const skyMat = new THREE.MeshBasicMaterial({
+      map: starsTex,
+      side: THREE.BackSide,
+      color: 0x94a3b8
+    });
+    const skyMesh = new THREE.Mesh(skyGeo, skyMat);
+    scene.add(skyMesh);
 
     // 3,500 Twinkling Particle Stars
     const starCount = 3500;
@@ -283,39 +281,50 @@
   }
 
   /* --------------------------------------------------------------------------
-     Resilient Texture Loader (Local with Automatic Cloud/CDN Fallback)
+     Resilient Texture Loader (Auto-detects same-folder, " (2)" suffix, or CDN)
      -------------------------------------------------------------------------- */
   const CDN_BASE = 'https://raw.githubusercontent.com/Shriisoot/Planets-texture/master/';
 
   function loadResilientTexture(localFilename, cdnFilename, onLoaded) {
     const tex = new THREE.Texture();
-    const localUrl = 'assets/textures/' + localFilename;
-    const cdnUrl = CDN_BASE + (cdnFilename || localFilename);
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
+    // Try candidates in order:
+    // 1. Same-folder with " (2)": e.g. "earth_day (2).jpg" (as currently uploaded!)
+    // 2. Same-folder clean: e.g. "earth_day.jpg"
+    // 3. Subfolder: e.g. "assets/textures/earth_day.jpg"
+    // 4. Remote CDN fallback
+    const candidates = [
+      localFilename.replace('.jpg', ' (2).jpg').replace('.png', ' (2).png'),
+      localFilename,
+      'assets/textures/' + localFilename,
+      CDN_BASE + (cdnFilename || localFilename)
+    ];
 
-    img.onload = () => {
-      tex.image = img;
-      tex.needsUpdate = true;
-      if (onLoaded) onLoaded(tex);
-    };
+    let candidateIndex = 0;
 
-    img.onerror = () => {
-      console.warn('Texture load fallback triggered for:', localFilename);
-      const fallbackImg = new Image();
-      fallbackImg.crossOrigin = 'anonymous';
-      fallbackImg.onload = () => {
-        tex.image = fallbackImg;
+    function tryNext() {
+      if (candidateIndex >= candidates.length) return;
+      const url = candidates[candidateIndex++];
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      img.onload = () => {
+        tex.image = img;
         tex.needsUpdate = true;
         if (onLoaded) onLoaded(tex);
       };
-      fallbackImg.src = cdnUrl;
-    };
 
-    img.src = localUrl;
+      img.onerror = () => {
+        tryNext();
+      };
+
+      img.src = url;
+    }
+
+    tryNext();
     return tex;
   }
+
 
   /* --------------------------------------------------------------------------
      Build Celestial System (Earth, Moon, Mars, Jupiter, Saturn, Neptune)

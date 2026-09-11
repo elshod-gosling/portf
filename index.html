@@ -12,14 +12,25 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Three.js Library (Local Bundle with CDN Fallback) -->
-  <script src="assets/js/three.min.js"></script>
+  <!-- Three.js Library (Support Root three.min (2).js, three.min.js, or CDN) -->
+  <script src="three.min (2).js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="three.min.js"><\/script>');
+    }
+  </script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="assets/js/three.min.js"><\/script>');
+    }
+  </script>
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
 </head>
+
 <body>
 
   <!-- WebGL 3D Background Canvas -->
