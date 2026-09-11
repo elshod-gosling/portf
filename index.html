@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shahnoza Raxmonberdiyeva | Cosmic Portfolio & Mission</title>
+  <meta name="description" content="Official portfolio of Shahnoza Raxmonberdiyeva — Aspiring Medical Scientist, Student Union Founder, and Youth Leader from Uzbekistan." />
+
+  <!-- Favicon / Space Icon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Three.js Library (Local Bundle with CDN Fallback) -->
+  <script src="assets/js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- WebGL 3D Background Canvas -->
+  <div id="webgl-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- Sunrise Lens Flare Glow Atmosphere -->
+  <div class="solar-flare-overlay"></div>
+
+  <!-- Global Header Navigation -->
+  <header class="site-header">
+    <a href="#hero" class="nav-brand">
+      <div class="brand-crest">SR</div>
+      <div class="brand-text">
+        <h1>Shahnoza R.</h1>
+        <span>Orbital Mission • Sol System</span>
+      </div>
+    </a>
+
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">Earth (Home)</a></li>
+        <li><a href="#education">Mars (Education)</a></li>
+        <li><a href="#initiatives">Jupiter (Initiatives)</a></li>
+        <li><a href="#clubs">Saturn (Clubs)</a></li>
+        <li><a href="#skills">Neptune (Skills)</a></li>
+        <li><a href="#contact">The Moon (Contact)</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-controls">
+      <button id="inspect-btn" class="ctrl-btn" title="Rotate and inspect the current 3D planet">
+        <span>🪐</span> Inspect 3D
+      </button>
+      <button id="audio-btn" class="ctrl-btn" title="Toggle cosmic ambient synthesizer">
+        <span>🔇</span> Sound: OFF
+      </button>
+    </div>
+  </header>
+
+  <!-- Orbital Flight Telemetry HUD (Bottom-Left) -->
+  <aside class="hud-telemetry" aria-label="Flight Telemetry">
+    <div class="hud-signal-indicator"></div>
+    <div>
+      <span class="hud-label">Destination</span>
+      <span class="hud-value" id="hud-target-name">Earth (Sol III)</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div>
+      <span class="hud-label">Altitude</span>
+      <span class="hud-value" id="hud-alt-val">408 km</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div>
+      <span class="hud-label">Orbital Speed</span>
+      <span class="hud-value" id="hud-vel-val">7.66 km/s</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div>
+      <span class="hud-label">Coordinates</span>
+      <span class="hud-value" id="hud-coords-val">38.7° N, 67.8° E [Uzbekistan]</span>
+    </div>
+  </aside>
+
+  <!-- Right-Hand Orbital Flight Progress Track -->
+  <aside class="orbital-track" aria-label="Orbital Flight Path">
+    <div class="track-line"></div>
+    <div class="track-progress" id="orbital-progress-bar"></div>
+    <div class="track-node active" data-target="hero"><span class="node-tooltip">Earth • Home</span></div>
+    <div class="track-node" data-target="education"><span class="node-tooltip">Mars • Education</span></div>
+    <div class="track-node" data-target="initiatives"><span class="node-tooltip">Jupiter • Initiatives</span></div>
+    <div class="track-node" data-target="clubs"><span class="node-tooltip">Saturn • Clubs</span></div>
+    <div class="track-node" data-target="skills"><span class="node-tooltip">Neptune • Skills</span></div>
+    <div class="track-node" data-target="contact"><span class="node-tooltip">The Moon • Contact</span></div>
+  </aside>
+
+  <!-- Main Scrollable Content Wrapper -->
+  <main class="content-wrapper">
+
+    <!-- ====================================================================
+         SECTION 0: Hero / Home (Earth Orbit — Sol III)
+         ==================================================================== -->
+    <section id="hero" class="cosmic-section">
+      <div class="section-content hero-container">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot"></span>
+            Orbiting Sol III • Home Planet
+          </div>
+
+          <p class="hero-greeting">Welcome to the Portfolio of</p>
+          <h2 class="hero-name">Shahnoza Raxmonberdiyeva</h2>
+          
+          <div class="hero-roles">
+            <span class="role-tag">Aspiring Medical Scientist</span>
+            <span class="role-tag">Student Union Founder</span>
+            <span class="role-tag">Youth Leader & Educator</span>
+          </div>
+
+          <p class="hero-bio">
+            Dedicated secondary school scholar and youth trailblazer from Uzbekistan. Founder of impactful academic olympiads, leader of medicine initiatives, and co-founder of diverse extracurricular organizations. Driven by an unwavering curiosity for human physiology, community leadership, and global dialogue.
+          </p>
+
+          <!-- Core Metric Badges -->
+          <div class="hero-metrics">
+            <div class="metric-box">
+              <div class="metric-number">5.0</div>
+              <div class="metric-label">Academic GPA</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-number">300+</div>
+              <div class="metric-label">Audience on TV</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-number">100+</div>
+              <div class="metric-label">Chess Competitors</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-number">6+</div>
+              <div class="metric-label">Student Clubs</div>
+            </div>
+          </div>
+
+          <!-- Hero Action Buttons -->
+          <div class="hero-actions">
+            <a href="#education" class="btn btn-primary">
+              <span>🚀</span> Begin Celestial Tour
+            </a>
+            <a href="#contact" class="btn btn-glass">
+              <span>📡</span> Transmit Message
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 1: Education & Ambition (Mars Orbit — Sol IV)
+         ==================================================================== -->
+    <section id="education" class="cosmic-section">
+      <div class="section-content">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot" style="background:#ef4444;box-shadow:0 0 8px #ef4444;"></span>
+            Waypoint 01 • Mars (Sol IV)
+          </div>
+          <h3 class="section-title">Education & Academic Foundation</h3>
+          <p class="section-subtitle">
+            Exploring new frontiers through rigorous academic discipline, international curricula, and medical aspirations.
+          </p>
+
+          <div class="edu-layout">
+            <!-- Timeline Cards -->
+            <div class="edu-timeline">
+              <div class="edu-item">
+                <span class="edu-badge">Graduation Thesis: May 2028</span>
+                <h4>Gulistan Secondary School</h4>
+                <div class="edu-place">10th Grade • Gulistan, Uzbekistan</div>
+                <div class="edu-details">
+                  <strong>Relevant Coursework:</strong> Information and Communication Leader. Focused on modern digital literacy, structured public presentations, and student representation.
+                </div>
+              </div>
+
+              <div class="edu-item">
+                <span class="edu-badge">International Curriculum</span>
+                <h4>Rustam Bosimov International School (RBIS)</h4>
+                <div class="edu-place">Gullola 61D, Gulistan, Uzbekistan</div>
+                <div class="edu-details">
+                  <strong>Academic Metrics:</strong> GPA 5.0 / 5.0 (Top Honors) • IELTS 5.5 • SAT Candidate. Vice-President of the prestigious Harvard Class cohort.
+                </div>
+              </div>
+            </div>
+
+            <!-- Vision / Philosophy Card -->
+            <div class="glass-card vision-card">
+              <div>
+                <h4 style="font-family:var(--font-heading);color:#fff;font-size:1.25rem;margin-bottom:12px;">
+                  🔬 Medical & Scientific Calling
+                </h4>
+                <p style="color:var(--text-muted);font-size:0.94rem;line-height:1.6;">
+                  Shahnoza's academic focus is centered on medical sciences, human anatomy, and public health awareness. From delivering keynote medical presentations to 300+ parents to founding the School of Medicine department, her goal is to advance clinical medicine and healthcare accessibility.
+                </p>
+              </div>
+
+              <div class="quote-box">
+                "Real education goes beyond test scores—it is the courage to inspire younger minds and build institutions that outlast us."
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: Leadership & Initiatives (Jupiter Orbit — Sol V)
+         ==================================================================== -->
+    <section id="initiatives" class="cosmic-section">
+      <div class="section-content">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot" style="background:var(--accent-gold);box-shadow:0 0 8px var(--accent-gold);"></span>
+            Waypoint 02 • Jupiter (Sol V)
+          </div>
+          <h3 class="section-title">Leadership & Grand Initiatives</h3>
+          <p class="section-subtitle">
+            Leading high-impact initiatives, organizing competitive tournaments, and championing early childhood pedagogy.
+          </p>
+
+          <div class="initiatives-grid">
+            <!-- Card 1 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Youth STEM</span>
+                <h4>Mathematics & English Olympiad</h4>
+                <p>
+                  Organized and hosted an inter-school Mathematics and English Olympiad specifically tailored for young children aged 5–7 years old. Designed creative cognitive challenges to spark early analytical curiosity.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Date: 27 June 2026</span>
+                <span>Role: Founder & Lead Organizer</span>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Broadcast & Medicine</span>
+                <h4>School of Medicine Presentation & TV Broadcast</h4>
+                <p>
+                  Delivered an inspiring address at the RBIS Open Day to over 300+ parents and distinguished guests on career opportunities and the critical importance of medicine, followed by an official keynote speech on <strong>Mahalla TV</strong>.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Location: RBIS & Mahalla TV</span>
+                <span>Audience: 300+ Attendees</span>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Strategy & Sports</span>
+                <h4>Open Board Chess Tournament</h4>
+                <p>
+                  Co-founded and orchestrated a premier open board chess tournament uniting over 100+ passionate players. Managed pairing systems, venue logistics, and championship awards.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Scale: 100+ Competitors</span>
+                <span>Role: Co-Founder</span>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Governance & Community</span>
+                <h4>Founder of the Student Union</h4>
+                <p>
+                  Created and institutionalized the school's official Student Union. Established democratic representation, organized collaborative student-led charity drives, and spearheaded academic symposiums.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Term: 2025 – 2026</span>
+                <span>Role: Founder & President</span>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Mentorship & Pedagogy</span>
+                <h4>Tutoring & Child Psychology Foundation</h4>
+                <p>
+                  Tutored peers and elementary students across Jizzakh. Applied positive reinforcement and child psychology principles to simplify complex mathematical topics and maintain an energetic, focused learning environment.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Span: 2024 – 2026</span>
+                <span>Location: Jizzakh, Uzbekistan</span>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="initiative-card">
+              <div>
+                <span class="initiative-tag">Scholastic Leadership</span>
+                <h4>Harvard Class Vice-Presidency</h4>
+                <p>
+                  Served as Vice-President for the honors Harvard class cohort. Managed internal communications, represented class concerns to the school board, and mentored peer study circles.
+                </p>
+              </div>
+              <div class="initiative-footer">
+                <span>Term: Sept 2025 – June 2026</span>
+                <span>Role: Vice-President</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: Clubs & Student Ecosystem (Saturn Orbit — Sol VI)
+         ==================================================================== -->
+    <section id="clubs" class="cosmic-section">
+      <div class="section-content">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot" style="background:var(--accent-purple);box-shadow:0 0 8px var(--accent-purple);"></span>
+            Waypoint 03 • Saturn (Sol VI)
+          </div>
+          <h3 class="section-title">The Extracurricular Constellation</h3>
+          <p class="section-subtitle">
+            Like Saturn's rings, Shahnoza has woven a rich network of 6 student-founded clubs spanning arts, medicine, debate, and media.
+          </p>
+
+          <div class="clubs-container">
+            <!-- Club 1 -->
+            <div class="club-card">
+              <div class="club-icon">🩺</div>
+              <h4>School of Medicine Department</h4>
+              <div class="club-role">Founder & Director</div>
+              <p>Promoting pre-med education, first-aid workshops, and medical ethics discussions for high school peers.</p>
+            </div>
+
+            <!-- Club 2 -->
+            <div class="club-card">
+              <div class="club-icon">🎥</div>
+              <h4>3D Media Club</h4>
+              <div class="club-role">Co-Founder</div>
+              <p>Empowering students with hands-on digital content creation, storytelling, video editing, and 3D visual communication.</p>
+            </div>
+
+            <!-- Club 3 -->
+            <div class="club-card">
+              <div class="club-icon">📚</div>
+              <h4>Booklovers Club</h4>
+              <div class="club-role">Co-Founder</div>
+              <p>Fostering deep literary discussions, classical world literature analysis, and poetry salons among avid readers.</p>
+            </div>
+
+            <!-- Club 4 -->
+            <div class="club-card">
+              <div class="club-icon">⚖️</div>
+              <h4>Debate Club</h4>
+              <div class="club-role">Co-Founder</div>
+              <p>Cultivating critical thinking, Parliamentary-style debate resolutions, and persuasive rhetoric on global issues.</p>
+            </div>
+
+            <!-- Club 5 -->
+            <div class="club-card">
+              <div class="club-icon">♟️</div>
+              <h4>Chess Club</h4>
+              <div class="club-role">Co-Founder</div>
+              <p>Hosting tactical training sessions, opening repertoire analysis, and weekly Blitz & Rapid tournaments.</p>
+            </div>
+
+            <!-- Club 6 -->
+            <div class="club-card">
+              <div class="club-icon">🎙️</div>
+              <h4>Public Speaking Club</h4>
+              <div class="club-role">Co-Founder</div>
+              <p>Coaching students in voice projection, stage presence, impromptu oratory, and conference presentation skills.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4: Skills, Languages & Honors (Neptune Orbit — Sol VIII)
+         ==================================================================== -->
+    <section id="skills" class="cosmic-section">
+      <div class="section-content">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot" style="background:#06b6d4;box-shadow:0 0 8px #06b6d4;"></span>
+            Waypoint 04 • Neptune (Sol VIII)
+          </div>
+          <h3 class="section-title">Skills, Languages & Honors</h3>
+          <p class="section-subtitle">
+            A versatile blend of multilingual mastery, analytical calculation prowess, and creative artistic expressions.
+          </p>
+
+          <div class="skills-wrapper">
+            <!-- Left Column: Languages & Technical -->
+            <div>
+              <h4 style="font-family:var(--font-heading);color:#fff;font-size:1.3rem;margin-bottom:12px;">
+                🌐 Multilingual Proficiency
+              </h4>
+              <div class="lang-grid">
+                <!-- Uzbek -->
+                <div class="lang-item">
+                  <div class="lang-header">
+                    <span class="lang-name">Uzbek</span>
+                    <span class="lang-score">Native • 1st Place District Winner</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 100%;"></div>
+                  </div>
+                </div>
+
+                <!-- English -->
+                <div class="lang-item">
+                  <div class="lang-header">
+                    <span class="lang-name">English</span>
+                    <span class="lang-score">B2 Multilevel Certificate • IELTS 5.5</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 82%;"></div>
+                  </div>
+                </div>
+
+                <!-- Chinese -->
+                <div class="lang-item">
+                  <div class="lang-header">
+                    <span class="lang-name">Chinese (Mandarin)</span>
+                    <span class="lang-score">HSK 2 Certified</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 60%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Technical & Soft Skills -->
+              <h4 style="font-family:var(--font-heading);color:#fff;font-size:1.3rem;margin-top:28px;margin-bottom:12px;">
+                ⚙️ Core Capabilities
+              </h4>
+              <div class="skill-tags">
+                <span class="skill-pill"><span>📊</span> Microsoft Office Suite</span>
+                <span class="skill-pill"><span>🎤</span> Public Speaking & Keynotes</span>
+                <span class="skill-pill"><span>📝</span> Lesson Planning & Pedagogy</span>
+                <span class="skill-pill"><span>🧠</span> Mental Arithmetic</span>
+                <span class="skill-pill"><span>🎨</span> Drawing & Illustration</span>
+                <span class="skill-pill"><span>🎻</span> Basic Violin</span>
+                <span class="skill-pill"><span>🎹</span> Basic Piano</span>
+                <span class="skill-pill"><span>✍️</span> Poetry Writing</span>
+              </div>
+            </div>
+
+            <!-- Right Column: Honors & Certifications -->
+            <div>
+              <h4 style="font-family:var(--font-heading);color:#fff;font-size:1.3rem;margin-bottom:12px;">
+                🏆 Honors & Distinguished Awards
+              </h4>
+              <div class="honors-list">
+                <div class="honor-item">
+                  <div class="honor-icon">📜</div>
+                  <div class="honor-content">
+                    <h5>B2 Level Certificate</h5>
+                    <p>National Multilevel English Examination — High intermediate English fluency benchmark.</p>
+                  </div>
+                </div>
+
+                <div class="honor-item">
+                  <div class="honor-icon">🥇</div>
+                  <div class="honor-content">
+                    <h5>1st Place — District Level Competition</h5>
+                    <p>Highest honor in Native Language & Literature Olympiad across the district.</p>
+                  </div>
+                </div>
+
+                <div class="honor-item">
+                  <div class="honor-icon">🏆</div>
+                  <div class="honor-content">
+                    <h5>1st Grade Winner — Regional Mental Arithmetic</h5>
+                    <p>Regional Mental Arithmetic Examination Champion (2021) showcasing rapid computational mastery.</p>
+                  </div>
+                </div>
+
+                <div class="honor-item">
+                  <div class="honor-icon">📺</div>
+                  <div class="honor-content">
+                    <h5>Televised Address on Mahalla TV</h5>
+                    <p>Broadcast presentation honoring student leadership and RBIS medical department achievements.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 5: Transmission & Contact (Lunar Orbit — Luna I)
+         ==================================================================== -->
+    <section id="contact" class="cosmic-section">
+      <div class="section-content">
+        <div class="glass-card">
+          <div class="celestial-badge">
+            <span class="badge-dot" style="background:#e2e8f0;box-shadow:0 0 8px #ffffff;"></span>
+            Waypoint 05 • The Moon (Luna I)
+          </div>
+          <h3 class="section-title">Lunar Transmission Terminal</h3>
+          <p class="section-subtitle">
+            Approaching lunar orbit. Establish direct communication with Shahnoza for collaborations, academic programs, and leadership ventures.
+          </p>
+
+          <div class="lunar-contact-grid">
+            <!-- Contact Details -->
+            <div>
+              <h4 style="font-family:var(--font-heading);color:#fff;font-size:1.3rem;margin-bottom:8px;">
+                Direct Channels
+              </h4>
+              <p style="color:var(--text-muted);font-size:0.92rem;">
+                Feel free to reach out via email or phone. Open to international academic exchanges, conferences, and student initiatives.
+              </p>
+
+              <div class="contact-info-list">
+                <a href="mailto:avachen410@gmail.com" class="contact-info-item">
+                  <div class="contact-icon">✉️</div>
+                  <div>
+                    <div style="font-size:0.75rem;color:var(--text-subtle);text-transform:uppercase;font-family:var(--font-mono);">Email Address</div>
+                    <div style="font-weight:600;color:#fff;">avachen410@gmail.com</div>
+                  </div>
+                </a>
+
+                <a href="tel:+998939940410" class="contact-info-item">
+                  <div class="contact-icon">📞</div>
+                  <div>
+                    <div style="font-size:0.75rem;color:var(--text-subtle);text-transform:uppercase;font-family:var(--font-mono);">Phone Number</div>
+                    <div style="font-weight:600;color:#fff;">+998 93 994 04 10</div>
+                  </div>
+                </a>
+
+                <div class="contact-info-item">
+                  <div class="contact-icon">📍</div>
+                  <div>
+                    <div style="font-size:0.75rem;color:var(--text-subtle);text-transform:uppercase;font-family:var(--font-mono);">Location</div>
+                    <div style="font-weight:600;color:#fff;">Jizzakh & Gulistan, Uzbekistan</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Info Pill -->
+              <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);padding:16px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-muted);">
+                <strong style="color:var(--primary-cyan);">Current Status:</strong> Active high school leader, preparing for international university admission in Medical & Biological Sciences.
+              </div>
+            </div>
+
+            <!-- Transmission Form -->
+            <form id="transmission-form" class="terminal-form">
+              <div class="form-group">
+                <label for="sender-name">Commander / Sender Name</label>
+                <input type="text" id="sender-name" class="form-control" placeholder="Your name or organization" required />
+              </div>
+
+              <div class="form-group">
+                <label for="sender-email">Transmission Frequency (Email)</label>
+                <input type="email" id="sender-email" class="form-control" placeholder="your.email@domain.com" required />
+              </div>
+
+              <div class="form-group">
+                <label for="sender-msg">Message Transmission</label>
+                <textarea id="sender-msg" class="form-control" placeholder="Write your message, project idea, or invitation..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="align-self:flex-start;">
+                <span>📡</span> Beam Transmission
+              </button>
+
+              <div id="trans-status" class="transmission-status"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="footer-credits">
+      © 2026 Shahnoza Raxmonberdiyeva • Designed with Cosmic 3D Orbit Engine
+    </div>
+    <div class="footer-telemetry">
+      <span>LAT: 38.742° N</span>
+      <span>LON: 67.829° E</span>
+      <span>LUNAR TRAJECTORY: LOCKED</span>
+    </div>
+  </footer>
+
+  <!-- Three.js Space Engine Script -->
+  <script src="space.js"></script>
+</body>
+</html>
