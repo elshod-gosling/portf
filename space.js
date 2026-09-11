@@ -283,11 +283,44 @@
   }
 
   /* --------------------------------------------------------------------------
+     Resilient Texture Loader (Local with Automatic Cloud/CDN Fallback)
+     -------------------------------------------------------------------------- */
+  const CDN_BASE = 'https://raw.githubusercontent.com/Shriisoot/Planets-texture/master/';
+
+  function loadResilientTexture(localFilename, cdnFilename, onLoaded) {
+    const tex = new THREE.Texture();
+    const localUrl = 'assets/textures/' + localFilename;
+    const cdnUrl = CDN_BASE + (cdnFilename || localFilename);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      tex.image = img;
+      tex.needsUpdate = true;
+      if (onLoaded) onLoaded(tex);
+    };
+
+    img.onerror = () => {
+      console.warn('Texture load fallback triggered for:', localFilename);
+      const fallbackImg = new Image();
+      fallbackImg.crossOrigin = 'anonymous';
+      fallbackImg.onload = () => {
+        tex.image = fallbackImg;
+        tex.needsUpdate = true;
+        if (onLoaded) onLoaded(tex);
+      };
+      fallbackImg.src = cdnUrl;
+    };
+
+    img.src = localUrl;
+    return tex;
+  }
+
+  /* --------------------------------------------------------------------------
      Build Celestial System (Earth, Moon, Mars, Jupiter, Saturn, Neptune)
      -------------------------------------------------------------------------- */
   function buildCelestialSystem() {
-    const loader = new THREE.TextureLoader();
-
     // 1. EARTH (Sol III) — The Hero Planet
     earthGroup = new THREE.Group();
     earthGroup.position.set(2.4, -2.2, 0.0);
@@ -297,8 +330,8 @@
     const earthRadius = 4.8;
     const earthGeo = new THREE.SphereGeometry(earthRadius, 64, 64);
 
-    const earthDayTex = loader.load('assets/textures/earth_day.jpg');
-    const earthNightTex = loader.load('assets/textures/earth_night.jpg');
+    const earthDayTex = loadResilientTexture('earth_day.jpg', '8k_earth_daymap.jpg');
+    const earthNightTex = loadResilientTexture('earth_night.jpg', '8k_earth_nightmap.jpg');
 
     // Standard PBR Material: Day Map + Warm Emissive Night Lights
     const earthMat = new THREE.MeshStandardMaterial({
@@ -314,7 +347,7 @@
     earthGroup.add(earthMesh);
 
     // Earth Clouds
-    const cloudsTex = loader.load('assets/textures/earth_clouds.jpg');
+    const cloudsTex = loadResilientTexture('earth_clouds.jpg', '2k_earth_clouds.jpg');
     const cloudsGeo = new THREE.SphereGeometry(earthRadius * 1.014, 64, 64);
     const cloudsMat = new THREE.MeshStandardMaterial({
       map: cloudsTex,
@@ -325,7 +358,6 @@
     });
     cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMat);
     earthGroup.add(cloudsMesh);
-
 
     // Atmospheric Rayleigh Scattering Rim (Cyan Rim Glow)
     const atmoGeo = new THREE.SphereGeometry(earthRadius * 1.032, 64, 64);
@@ -356,7 +388,7 @@
     celestialBodies.push(earthGroup);
 
     // Hero Moon in upper-right cosmic sky (matching reference image)
-    const moonTex = loader.load('assets/textures/moon.jpg');
+    const moonTex = loadResilientTexture('moon.jpg', '2k_moon.jpg');
     const heroMoonGeo = new THREE.SphereGeometry(1.35, 48, 48);
     const moonMat = new THREE.MeshStandardMaterial({
       map: moonTex,
@@ -371,7 +403,7 @@
     // 2. MARS (Sol IV) — Education
     const marsRadius = 3.2;
     const marsGeo = new THREE.SphereGeometry(marsRadius, 48, 48);
-    const marsTex = loader.load('assets/textures/mars.jpg');
+    const marsTex = loadResilientTexture('mars.jpg', '8k_mars.jpg');
     const marsMat = new THREE.MeshStandardMaterial({
       map: marsTex,
       roughness: 0.85,
@@ -385,7 +417,7 @@
     // 3. JUPITER (Sol V) — Initiatives
     const jupiterRadius = 8.0;
     const jupiterGeo = new THREE.SphereGeometry(jupiterRadius, 64, 64);
-    const jupiterTex = loader.load('assets/textures/jupiter.jpg');
+    const jupiterTex = loadResilientTexture('jupiter.jpg', '8k_jupiter.jpg');
     const jupiterMat = new THREE.MeshStandardMaterial({
       map: jupiterTex,
       roughness: 0.9,
@@ -403,7 +435,7 @@
 
     const saturnRadius = 6.0;
     const saturnGeo = new THREE.SphereGeometry(saturnRadius, 48, 48);
-    const saturnTex = loader.load('assets/textures/saturn.jpg');
+    const saturnTex = loadResilientTexture('saturn.jpg', '8k_saturn.jpg');
     const saturnMat = new THREE.MeshStandardMaterial({
       map: saturnTex,
       roughness: 0.88,
@@ -427,7 +459,7 @@
       uvs.setXY(i, u, 0.5);
     }
 
-    const ringTex = loader.load('assets/textures/saturn_ring.png');
+    const ringTex = loadResilientTexture('saturn_ring.png', '8k_saturn_ring_alpha.png');
     const ringMat = new THREE.MeshStandardMaterial({
       map: ringTex,
       side: THREE.DoubleSide,
@@ -446,7 +478,7 @@
     // 5. NEPTUNE (Sol VIII) — Skills
     const neptuneRadius = 4.5;
     const neptuneGeo = new THREE.SphereGeometry(neptuneRadius, 48, 48);
-    const neptuneTex = loader.load('assets/textures/neptune.jpg');
+    const neptuneTex = loadResilientTexture('neptune.jpg', '2k_neptune.jpg');
     const neptuneMat = new THREE.MeshStandardMaterial({
       map: neptuneTex,
       roughness: 0.75,
@@ -475,6 +507,7 @@
     distantEarthMesh.position.set(8.0, 4.0, -260.0);
     scene.add(distantEarthMesh);
   }
+
 
   /* --------------------------------------------------------------------------
      Scroll Waypoint Tracking & Interpolation
