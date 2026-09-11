@@ -6,75 +6,7 @@
 (function () {
   'use strict';
 
-  if (typeof THREE === 'undefined') {
-    console.error('Three.js is not loaded.');
-    return;
-  }
-
-  // Configuration & Waypoints
-  const WAYPOINTS = [
-    {
-      id: 'hero',
-      name: 'Earth (Sol III)',
-      alt: '408 km',
-      velocity: '7.66 km/s',
-      coords: '38.7° N, 67.8° E [Uzbekistan]',
-      camPos: new THREE.Vector3(0.0, 0.0, 10.0),
-      lookAt: new THREE.Vector3(0.5, 0.0, 0.0),
-      bodyIndex: 0
-    },
-    {
-      id: 'education',
-      name: 'Mars (Sol IV)',
-      alt: '1,420 km',
-      velocity: '4.68 km/s',
-      coords: '18.4° N, 226.0° E [Olympus Mons]',
-      camPos: new THREE.Vector3(13.0, 3.2, -26.0),
-      lookAt: new THREE.Vector3(18.0, 3.0, -35.0),
-      bodyIndex: 1
-    },
-    {
-      id: 'initiatives',
-      name: 'Jupiter (Sol V)',
-      alt: '42,800 km',
-      velocity: '13.07 km/s',
-      coords: '22.1° S, 114.8° W [Great Red Spot]',
-      camPos: new THREE.Vector3(-15.0, 4.5, -55.0),
-      lookAt: new THREE.Vector3(-25.0, 4.0, -75.0),
-      bodyIndex: 2
-    },
-    {
-      id: 'clubs',
-      name: 'Saturn (Sol VI)',
-      alt: '35,600 km',
-      velocity: '9.69 km/s',
-      coords: 'Ring Plane Inclination: 26.7°',
-      camPos: new THREE.Vector3(16.0, 0.0, -96.0),
-      lookAt: new THREE.Vector3(25.0, -3.0, -115.0),
-      bodyIndex: 3
-    },
-    {
-      id: 'skills',
-      name: 'Neptune (Sol VIII)',
-      alt: '18,200 km',
-      velocity: '5.43 km/s',
-      coords: 'Deep Azure Mantle [Triton Horizon]',
-      camPos: new THREE.Vector3(-10.0, -2.5, -138.0),
-      lookAt: new THREE.Vector3(-18.0, -4.0, -155.0),
-      bodyIndex: 4
-    },
-    {
-      id: 'contact',
-      name: 'The Moon (Luna I)',
-      alt: '112 km',
-      velocity: '1.63 km/s',
-      coords: '0.67° N, 23.47° E [Mare Tranquillitatis]',
-      camPos: new THREE.Vector3(-1.5, 0.5, -190.0),
-      lookAt: new THREE.Vector3(0.0, 0.0, -200.0),
-      bodyIndex: 5
-    }
-  ];
-
+  let WAYPOINTS = [];
   let scene, camera, renderer;
   let celestialBodies = [];
   let earthGroup, earthMesh, cloudsMesh, atmosphereMesh;
@@ -83,10 +15,7 @@
   let sunFlareSprite, cameraLight;
   let starField;
 
-  let currentCamPos = new THREE.Vector3().copy(WAYPOINTS[0].camPos);
-  let targetCamPos = new THREE.Vector3().copy(WAYPOINTS[0].camPos);
-  let currentLookAt = new THREE.Vector3().copy(WAYPOINTS[0].lookAt);
-  let targetLookAt = new THREE.Vector3().copy(WAYPOINTS[0].lookAt);
+  let currentCamPos, targetCamPos, currentLookAt, targetLookAt;
   let currentWaypointIndex = 0;
 
   let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
@@ -98,7 +27,90 @@
   let isAudioMuted = true;
   let ambientOsc1, ambientOsc2, ambientFilter, ambientGain;
 
-  init();
+  function launch() {
+    if (typeof THREE === 'undefined') {
+      setTimeout(launch, 50);
+      return;
+    }
+    setupWaypointsAndVectors();
+    init();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', launch);
+  } else {
+    launch();
+  }
+
+  function setupWaypointsAndVectors() {
+    WAYPOINTS = [
+      {
+        id: 'hero',
+        name: 'Earth (Sol III)',
+        alt: '408 km',
+        velocity: '7.66 km/s',
+        coords: '38.7° N, 67.8° E [Uzbekistan]',
+        camPos: new THREE.Vector3(0.0, 0.0, 10.0),
+        lookAt: new THREE.Vector3(0.5, 0.0, 0.0),
+        bodyIndex: 0
+      },
+      {
+        id: 'education',
+        name: 'Mars (Sol IV)',
+        alt: '1,420 km',
+        velocity: '4.68 km/s',
+        coords: '18.4° N, 226.0° E [Olympus Mons]',
+        camPos: new THREE.Vector3(13.0, 3.2, -26.0),
+        lookAt: new THREE.Vector3(18.0, 3.0, -35.0),
+        bodyIndex: 1
+      },
+      {
+        id: 'initiatives',
+        name: 'Jupiter (Sol V)',
+        alt: '42,800 km',
+        velocity: '13.07 km/s',
+        coords: '22.1° S, 114.8° W [Great Red Spot]',
+        camPos: new THREE.Vector3(-15.0, 4.5, -55.0),
+        lookAt: new THREE.Vector3(-25.0, 4.0, -75.0),
+        bodyIndex: 2
+      },
+      {
+        id: 'clubs',
+        name: 'Saturn (Sol VI)',
+        alt: '35,600 km',
+        velocity: '9.69 km/s',
+        coords: 'Ring Plane Inclination: 26.7°',
+        camPos: new THREE.Vector3(16.0, 0.0, -96.0),
+        lookAt: new THREE.Vector3(25.0, -3.0, -115.0),
+        bodyIndex: 3
+      },
+      {
+        id: 'skills',
+        name: 'Neptune (Sol VIII)',
+        alt: '18,200 km',
+        velocity: '5.43 km/s',
+        coords: 'Deep Azure Mantle [Triton Horizon]',
+        camPos: new THREE.Vector3(-10.0, -2.5, -138.0),
+        lookAt: new THREE.Vector3(-18.0, -4.0, -155.0),
+        bodyIndex: 4
+      },
+      {
+        id: 'contact',
+        name: 'The Moon (Luna I)',
+        alt: '112 km',
+        velocity: '1.63 km/s',
+        coords: '0.67° N, 23.47° E [Mare Tranquillitatis]',
+        camPos: new THREE.Vector3(-1.5, 0.5, -190.0),
+        lookAt: new THREE.Vector3(0.0, 0.0, -200.0),
+        bodyIndex: 5
+      }
+    ];
+
+    currentCamPos = new THREE.Vector3().copy(WAYPOINTS[0].camPos);
+    targetCamPos = new THREE.Vector3().copy(WAYPOINTS[0].camPos);
+    currentLookAt = new THREE.Vector3().copy(WAYPOINTS[0].lookAt);
+    targetLookAt = new THREE.Vector3().copy(WAYPOINTS[0].lookAt);
+  }
 
   function init() {
     const canvas = document.getElementById('webgl-canvas');
@@ -289,14 +301,14 @@
     const tex = new THREE.Texture();
 
     // Try candidates in order:
-    // 1. Same-folder with " (2)": e.g. "earth_day (2).jpg" (as currently uploaded!)
+    // 1. Subfolder: e.g. "assets/textures/earth_day.jpg" (standard repository layout)
     // 2. Same-folder clean: e.g. "earth_day.jpg"
-    // 3. Subfolder: e.g. "assets/textures/earth_day.jpg"
+    // 3. Same-folder with " (2)": e.g. "earth_day (2).jpg"
     // 4. Remote CDN fallback
     const candidates = [
-      localFilename.replace('.jpg', ' (2).jpg').replace('.png', ' (2).png'),
-      localFilename,
       'assets/textures/' + localFilename,
+      localFilename,
+      localFilename.replace('.jpg', ' (2).jpg').replace('.png', ' (2).png'),
       CDN_BASE + (cdnFilename || localFilename)
     ];
 
