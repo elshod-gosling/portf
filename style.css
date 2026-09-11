@@ -91,6 +91,46 @@ body {
   transition: opacity 1.2s ease;
 }
 
+/* Local File Notice Banner */
+.file-notice-banner {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: rgba(245, 158, 11, 0.92);
+  color: #030712;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  font-weight: 500;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 90%;
+}
+
+.file-notice-banner code {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.file-notice-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #030712;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+
 /* --------------------------------------------------------------------------
    Cosmic HUD & Telemetry Interface
    -------------------------------------------------------------------------- */

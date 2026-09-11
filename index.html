@@ -27,8 +27,15 @@
     <canvas id="webgl-canvas"></canvas>
   </div>
 
+  <!-- Local File Protocol Notice Banner (Only shown if opened via file://) -->
+  <div id="file-protocol-notice" class="file-notice-banner" style="display:none;">
+    <span>⚡ <strong>Local File Notice:</strong> Web browsers (Chrome/Edge) block WebGL textures on direct <code>file://</code> URLs. Double-click <strong>start.bat</strong> in your project folder (or run <code>py serve.py</code>) to see all 8K NASA textures in full glory!</span>
+    <button onclick="document.getElementById('file-protocol-notice').style.display='none'" class="file-notice-close">✕</button>
+  </div>
+
   <!-- Sunrise Lens Flare Glow Atmosphere -->
   <div class="solar-flare-overlay"></div>
+
 
   <!-- Global Header Navigation -->
   <header class="site-header">
