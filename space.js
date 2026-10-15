@@ -831,24 +831,6 @@
     window.addEventListener('mousemove', onPointerMove);
     window.addEventListener('click', onPointerClick);
 
-    // Universal Smooth Scrolling for All In-Page Navigation Links
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener('click', (e) => {
-        const href = anchor.getAttribute('href');
-        if (!href || href === '#') return;
-        const targetId = href.slice(1);
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          e.preventDefault();
-          targetEl.scrollIntoView({ behavior: 'smooth' });
-          playTone(660, 0.08, 'sine');
-          if (history.pushState) {
-            history.pushState(null, null, `#${targetId}`);
-          }
-        }
-      });
-    });
-
     // Track Node Clicks
     const trackNodes = document.querySelectorAll('.track-node');
     trackNodes.forEach((node) => {
@@ -857,24 +839,9 @@
         const targetEl = document.getElementById(targetId);
         if (targetEl) {
           targetEl.scrollIntoView({ behavior: 'smooth' });
-          playTone(660, 0.08, 'sine');
         }
       });
     });
-
-    // Liquid Glass Specular Shimmer Mouse Tracking
-    const glassCards = document.querySelectorAll('.glass-card, .neon-sign-outer, .dossier-card');
-    window.addEventListener('mousemove', (e) => {
-      glassCards.forEach((card) => {
-        const rect = card.getBoundingClientRect();
-        if (e.clientY >= rect.top - 100 && e.clientY <= rect.bottom + 100) {
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          card.style.setProperty('--card-mx', `${Math.max(0, Math.min(100, x))}%`);
-          card.style.setProperty('--card-my', `${Math.max(0, Math.min(100, y))}%`);
-        }
-      });
-    }, { passive: true });
 
     // 3D Planet Inspection Mode Toggle
     const inspectBtn = document.getElementById('inspect-btn');
