@@ -1,6 +1,7 @@
 /**
  * Shahnoza Raxmonberdiyeva — 3D Space Experience Engine
  * Photorealistic Three.js Planets • Atmospheric Shaders • Scroll Waypoints • Audio Synthesizer
+ * Cyber Interactivity • Raycasting • Physics Inertia • Uzbek Cultural Astronomy Beacon
  */
 
 (function () {
@@ -9,7 +10,8 @@
   let WAYPOINTS = [];
   let scene, camera, renderer;
   let celestialBodies = [];
-  let earthGroup, earthMesh, cloudsMesh, atmosphereMesh;
+  let interactableObjects = [];
+  let earthGroup, earthMesh, cloudsMesh, atmosphereMesh, uzbekistanBeaconGroup;
   let heroMoonMesh;
   let marsMesh, jupiterMesh, saturnGroup, saturnMesh, neptuneMesh, footerMoonMesh;
   let sunFlareSprite, cameraLight;
@@ -17,15 +19,71 @@
 
   let currentCamPos, targetCamPos, currentLookAt, targetLookAt;
   let currentWaypointIndex = 0;
+  let zoomLevel = 1.0;
+  let autoOrbit = true;
 
+  // Raycaster & Interaction
+  const raycaster = new THREE.Raycaster();
+  const mousePointer = new THREE.Vector2();
+  let hoveredObject = null;
+
+  // Physics Drag Inertia
   let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-  let isInspectMode = false;
   let isDragging = false;
   let previousPointerPos = { x: 0, y: 0 };
+  let spinVelocityX = 0;
+  let spinVelocityY = 0;
 
+  // Audio Synthesizer
   let audioCtx = null;
   let isAudioMuted = true;
   let ambientOsc1, ambientOsc2, ambientFilter, ambientGain;
+
+  // Planet Dossier Data
+  const PLANET_DATA = {
+    earth: {
+      name: "Earth (Sol III) — Cradle of Civilizations",
+      badge: "HOMELAND • UZBEKISTAN CORE",
+      meta: "Coordinates: 40.0° N, 68.0° E [Jizzakh & Samarkand] • Radius: 6,371 km",
+      desc: "Home planet of Shahnoza Raxmonberdiyeva. Central Asia and Uzbekistan stand as the historic epicenter of Islamic Golden Age astronomy and medicine — from Mirzo Ulugh Beg's observatory in Samarkand that mapped 1,018 stars to Abu Ali Ibn Sina (Avicenna) of Bukhara, the father of modern medicine."
+    },
+    mars: {
+      name: "Mars (Sol IV) — The Red Frontier",
+      badge: "ACADEMIC AMBITION & EDUCATION",
+      meta: "Orbital Distance: 1.524 AU • Gravity: 0.38g • Radius: 3,389 km",
+      desc: "Symbol of tireless intellectual exploration and ambition. Mirroring Shahnoza's academic milestones at Rustam Bosimov International School (GPA 5.0) and Gulistan Secondary School, and her dedication to biological and clinical sciences."
+    },
+    jupiter: {
+      name: "Jupiter (Sol V) — The Great Sovereign",
+      badge: "LEADERSHIP & GRAND INITIATIVES",
+      meta: "Mass: 317.8 Earths • Great Red Spot Storm • Radius: 69,911 km",
+      desc: "Massive scale and gravitational leadership. Represents Shahnoza's high-impact social initiatives: founding the Student Union, hosting the Olympiad for young children, and delivering televised medical addresses to 300+ audiences on Mahalla TV."
+    },
+    saturn: {
+      name: "Saturn (Sol VI) — Rings of Harmony",
+      badge: "EXTRACURRICULAR CONSTELLATION",
+      meta: "Ring System Span: 282,000 km • Inclination: 26.7° • Radius: 58,232 km",
+      desc: "Like Saturn's rings woven of countless orbits, Shahnoza co-founded 6 interconnected student clubs spanning Medicine, 3D Media, Booklovers, Debate, Chess, and Public Speaking, honoring the mathematical symmetry pioneered by Al-Khwarizmi."
+    },
+    neptune: {
+      name: "Neptune (Sol VIII) — Azure Horizon",
+      badge: "LANGUAGES & MULTIDISCIPLINARY TALENTS",
+      meta: "Wind Speeds: 2,100 km/h • Mantle: Methane & Water Ice • Radius: 24,622 km",
+      desc: "Deep celestial azure reflecting linguistic eloquence and cognitive mastery. Celebrating Native Uzbek literature (1st Place District Laureate), B2 National English Certificate, mental arithmetic championship, and musical arts (piano & violin)."
+    },
+    moon: {
+      name: "The Moon (Luna I) — Orbital Outpost",
+      badge: "TRANSMISSION TERMINAL & LORE",
+      meta: "Orbital Radius: 384,400 km • Named Craters: Ulugh Beg & Ibn Sina",
+      desc: "The lunar surface holds international craters named 'Ulugh Beigh' and 'Avicenna' honoring Uzbekistan's supreme astronomer and physician. The gateway for direct messages, transmissions, and future global collaborations."
+    },
+    beacon: {
+      name: "Uzbekistan Beacon — Jizzakh & Samarkand",
+      badge: "ASTRONOMICAL & MEDICAL RENAISSANCE",
+      meta: "Latitude: 40° N • Longitude: 68° E • Silk Road Heart",
+      desc: "Welcome to the heartland of Central Asian genius. The birthplace of algebra (Al-Khwarizmi), medicine (Ibn Sina), and precision star catalogues (Mirzo Ulugh Beg). Shahnoza carries this legacy forward into contemporary health sciences and youth leadership."
+    }
+  };
 
   function launch() {
     if (typeof THREE === 'undefined') {
@@ -46,17 +104,17 @@
     WAYPOINTS = [
       {
         id: 'hero',
-        name: 'Earth (Sol III)',
+        name: 'Earth (Sol III) — Uzbekistan Core',
         alt: '408 km',
         velocity: '7.66 km/s',
-        coords: '38.7° N, 67.8° E [Uzbekistan]',
+        coords: '40.0° N, 68.0° E [Jizzakh & Samarkand]',
         camPos: new THREE.Vector3(0.0, 0.0, 10.0),
         lookAt: new THREE.Vector3(0.5, 0.0, 0.0),
         bodyIndex: 0
       },
       {
         id: 'education',
-        name: 'Mars (Sol IV)',
+        name: 'Mars (Sol IV) — Red Frontier',
         alt: '1,420 km',
         velocity: '4.68 km/s',
         coords: '18.4° N, 226.0° E [Olympus Mons]',
@@ -66,7 +124,7 @@
       },
       {
         id: 'initiatives',
-        name: 'Jupiter (Sol V)',
+        name: 'Jupiter (Sol V) — Leadership Giant',
         alt: '42,800 km',
         velocity: '13.07 km/s',
         coords: '22.1° S, 114.8° W [Great Red Spot]',
@@ -76,7 +134,7 @@
       },
       {
         id: 'clubs',
-        name: 'Saturn (Sol VI)',
+        name: 'Saturn (Sol VI) — Golden Rings',
         alt: '35,600 km',
         velocity: '9.69 km/s',
         coords: 'Ring Plane Inclination: 26.7°',
@@ -86,7 +144,7 @@
       },
       {
         id: 'skills',
-        name: 'Neptune (Sol VIII)',
+        name: 'Neptune (Sol VIII) — Azure Mantle',
         alt: '18,200 km',
         velocity: '5.43 km/s',
         coords: 'Deep Azure Mantle [Triton Horizon]',
@@ -96,7 +154,7 @@
       },
       {
         id: 'contact',
-        name: 'The Moon (Luna I)',
+        name: 'The Moon (Luna I) — Ulugh Beg Outpost',
         alt: '112 km',
         velocity: '1.63 km/s',
         coords: '0.67° N, 23.47° E [Mare Tranquillitatis]',
@@ -119,7 +177,6 @@
     scene.background = new THREE.Color(0x030712);
     scene.fog = new THREE.FogExp2(0x030712, 0.0006);
 
-
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2500);
     camera.position.copy(currentCamPos);
     camera.lookAt(currentLookAt);
@@ -140,18 +197,15 @@
     if (window.location.protocol === 'file:') {
       const banner = document.getElementById('file-protocol-notice');
       if (banner) banner.style.display = 'flex';
-      console.warn('Three.js Notice: Browsers block WebGL textures on file:// URLs. Run "start.bat" or deploy to web to see textures.');
     }
 
     setupLighting();
     setupCosmicBackground();
     buildCelestialSystem();
     setupEvents();
+    setupDossierControls();
 
-
-    // Trigger initial scroll update immediately
     updateScrollPosition();
-
     animate();
   }
 
@@ -159,25 +213,23 @@
      Lighting & Sun Flare
      -------------------------------------------------------------------------- */
   function setupLighting() {
-    // Subtle cosmic ambient light (deep space dark)
-    const ambient = new THREE.AmbientLight(0x0a1428, 0.35);
+    const ambient = new THREE.AmbientLight(0x0a1428, 0.4);
     scene.add(ambient);
 
-    // Primary Sun Light (illuminating Earth's limb from upper-left)
-    const earthSunLight = new THREE.DirectionalLight(0xfff6e5, 1.8);
+    // Primary Sun Light (illuminating Earth from top-left)
+    const earthSunLight = new THREE.DirectionalLight(0xfff6e5, 1.9);
     earthSunLight.position.set(-16, 10, 7);
     earthSunLight.target.position.set(2.4, -2.2, 0.0);
     scene.add(earthSunLight);
     scene.add(earthSunLight.target);
 
-    // Subtle planetary key light for Mars, Jupiter, Saturn as camera moves
-    cameraLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    // Camera Key Light for travel
+    cameraLight = new THREE.DirectionalLight(0xffffff, 0.65);
     cameraLight.position.set(0, 5, 10);
     scene.add(cameraLight);
 
     createSunFlare();
   }
-
 
   function createSunFlare() {
     const canvas = document.createElement('canvas');
@@ -185,21 +237,20 @@
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Central radiant burst
     const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
     grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
     grad.addColorStop(0.12, 'rgba(235, 248, 255, 0.95)');
     grad.addColorStop(0.28, 'rgba(56, 189, 248, 0.7)');
-    grad.addColorStop(0.55, 'rgba(14, 165, 233, 0.25)');
+    grad.addColorStop(0.55, 'rgba(244, 63, 94, 0.3)');
     grad.addColorStop(1.0, 'rgba(3, 7, 18, 0.0)');
 
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 512, 512);
 
-    // 8-Point Diffraction Spikes (like reference image sunrise)
+    // 8-Point Diffraction Spikes
     ctx.save();
     ctx.translate(256, 256);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
     ctx.lineWidth = 2.0;
     for (let i = 0; i < 8; i++) {
       ctx.rotate((Math.PI * 2) / 8);
@@ -219,17 +270,15 @@
     });
 
     sunFlareSprite = new THREE.Sprite(flareMaterial);
-    // Positioned right on the upper-left horizon curve of Earth
     sunFlareSprite.position.set(-1.4, 1.35, 1.0);
     sunFlareSprite.scale.set(8.5, 8.5, 1.0);
     scene.add(sunFlareSprite);
   }
 
   /* --------------------------------------------------------------------------
-     Cosmic Background & Twinkling Stars
+     Cosmic Background & Starfield
      -------------------------------------------------------------------------- */
   function setupCosmicBackground() {
-    // Deep space Milky Way skybox with resilient candidate loader
     const starsTex = loadResilientTexture('stars.jpg', '2k%20stars%20+%20milkyway.jpg', function(tex) {
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
@@ -245,7 +294,6 @@
     const skyMesh = new THREE.Mesh(skyGeo, skyMat);
     scene.add(skyMesh);
 
-    // 3,500 Twinkling Particle Stars
     const starCount = 3500;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
@@ -263,17 +311,17 @@
 
       const randColor = Math.random();
       if (randColor > 0.8) {
-        starColors[idx] = 0.5;
-        starColors[idx + 1] = 0.85;
-        starColors[idx + 2] = 1.0; // Cyan
+        starColors[idx] = 0.0;
+        starColors[idx + 1] = 0.94;
+        starColors[idx + 2] = 1.0; // Neon Cyan
       } else if (randColor > 0.65) {
         starColors[idx] = 1.0;
-        starColors[idx + 1] = 0.88;
-        starColors[idx + 2] = 0.6; // Amber
+        starColors[idx + 1] = 0.16;
+        starColors[idx + 2] = 0.52; // Neon Magenta/Pink
       } else {
         starColors[idx] = 0.96;
         starColors[idx + 1] = 0.98;
-        starColors[idx + 2] = 1.0; // Starlight white
+        starColors[idx + 2] = 1.0; // White
       }
     }
 
@@ -293,18 +341,13 @@
   }
 
   /* --------------------------------------------------------------------------
-     Resilient Texture Loader (Auto-detects same-folder, " (2)" suffix, or CDN)
+     Resilient Texture Loader
      -------------------------------------------------------------------------- */
   const CDN_BASE = 'https://raw.githubusercontent.com/Shriisoot/Planets-texture/master/';
 
   function loadResilientTexture(localFilename, cdnFilename, onLoaded) {
     const tex = new THREE.Texture();
 
-    // Try candidates in order:
-    // 1. Subfolder: e.g. "assets/textures/earth_day.jpg" (standard repository layout)
-    // 2. Same-folder clean: e.g. "earth_day.jpg"
-    // 3. Same-folder with " (2)": e.g. "earth_day (2).jpg"
-    // 4. Remote CDN fallback
     const candidates = [
       'assets/textures/' + localFilename,
       localFilename,
@@ -337,16 +380,16 @@
     return tex;
   }
 
-
   /* --------------------------------------------------------------------------
-     Build Celestial System (Earth, Moon, Mars, Jupiter, Saturn, Neptune)
+     Build Celestial System & Interactive Objects
      -------------------------------------------------------------------------- */
   function buildCelestialSystem() {
-    // 1. EARTH (Sol III) — The Hero Planet
+    // 1. EARTH (Sol III) — Oriented to Uzbekistan & Central Asia
     earthGroup = new THREE.Group();
     earthGroup.position.set(2.4, -2.2, 0.0);
     earthGroup.rotation.z = THREE.MathUtils.degToRad(23.4);
-    earthGroup.rotation.y = THREE.MathUtils.degToRad(140);
+    // 202 degrees faces Uzbekistan and Central Asia directly toward the viewer
+    earthGroup.rotation.y = THREE.MathUtils.degToRad(202);
 
     const earthRadius = 4.8;
     const earthGeo = new THREE.SphereGeometry(earthRadius, 64, 64);
@@ -354,18 +397,19 @@
     const earthDayTex = loadResilientTexture('earth_day.jpg', '8k_earth_daymap.jpg');
     const earthNightTex = loadResilientTexture('earth_night.jpg', '8k_earth_nightmap.jpg');
 
-    // Standard PBR Material: Day Map + Warm Emissive Night Lights
     const earthMat = new THREE.MeshStandardMaterial({
       map: earthDayTex,
-      emissive: new THREE.Color(0xffaa44),
+      emissive: new THREE.Color(0xffbe6b),
       emissiveMap: earthNightTex,
-      emissiveIntensity: 0.65,
-      roughness: 0.7,
+      emissiveIntensity: 0.75,
+      roughness: 0.65,
       metalness: 0.05
     });
 
     earthMesh = new THREE.Mesh(earthGeo, earthMat);
+    earthMesh.userData = { id: 'earth', name: 'Earth (Sol III)' };
     earthGroup.add(earthMesh);
+    interactableObjects.push(earthMesh);
 
     // Earth Clouds
     const cloudsTex = loadResilientTexture('earth_clouds.jpg', '2k_earth_clouds.jpg');
@@ -394,7 +438,7 @@
         varying vec3 vNormal;
         void main() {
           float intensity = pow(0.68 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.2);
-          gl_FragColor = vec4(0.25, 0.75, 1.0, 1.0) * intensity * 2.2;
+          gl_FragColor = vec4(0.0, 0.94, 1.0, 1.0) * intensity * 2.2;
         }
       `,
       side: THREE.BackSide,
@@ -405,10 +449,44 @@
     atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
     earthGroup.add(atmosphereMesh);
 
+    // 🌟 3D INTERACTIVE UZBEKISTAN BEACON (Lat 40° N, Lon 68° E)
+    uzbekistanBeaconGroup = new THREE.Group();
+    // Position on sphere surface for 40°N, 68°E
+    uzbekistanBeaconGroup.position.set(1.377, 3.085, -3.409);
+    uzbekistanBeaconGroup.lookAt(new THREE.Vector3(1.377 * 2, 3.085 * 2, -3.409 * 2));
+
+    // Radar pulse ring
+    const radarGeo = new THREE.RingGeometry(0.12, 0.22, 32);
+    const radarMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9
+    });
+    const radarMesh = new THREE.Mesh(radarGeo, radarMat);
+    uzbekistanBeaconGroup.add(radarMesh);
+
+    // Glowing Neon Pin Cone
+    const pinGeo = new THREE.ConeGeometry(0.12, 0.35, 16);
+    pinGeo.rotateX(Math.PI / 2);
+    const pinMat = new THREE.MeshBasicMaterial({
+      color: 0xff2a85
+    });
+    const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+    pinMesh.userData = { id: 'beacon', name: 'Uzbekistan Beacon' };
+    uzbekistanBeaconGroup.add(pinMesh);
+    interactableObjects.push(pinMesh);
+
+    // PointLight on beacon
+    const beaconLight = new THREE.PointLight(0x00f0ff, 1.8, 3.5);
+    uzbekistanBeaconGroup.add(beaconLight);
+
+    earthGroup.add(uzbekistanBeaconGroup);
+
     scene.add(earthGroup);
     celestialBodies.push(earthGroup);
 
-    // Hero Moon in upper-right cosmic sky (matching reference image)
+    // Hero Moon in upper-right cosmic sky
     const moonTex = loadResilientTexture('moon.jpg', '2k_moon.jpg');
     const heroMoonGeo = new THREE.SphereGeometry(1.35, 48, 48);
     const moonMat = new THREE.MeshStandardMaterial({
@@ -419,7 +497,9 @@
     heroMoonMesh = new THREE.Mesh(heroMoonGeo, moonMat);
     heroMoonMesh.position.set(5.0, 1.8, -1.0);
     heroMoonMesh.rotation.y = THREE.MathUtils.degToRad(-40);
+    heroMoonMesh.userData = { id: 'moon', name: 'The Moon (Luna I)' };
     scene.add(heroMoonMesh);
+    interactableObjects.push(heroMoonMesh);
 
     // 2. MARS (Sol IV) — Education
     const marsRadius = 3.2;
@@ -432,8 +512,10 @@
     });
     marsMesh = new THREE.Mesh(marsGeo, marsMat);
     marsMesh.position.set(18.0, 3.0, -35.0);
+    marsMesh.userData = { id: 'mars', name: 'Mars (Sol IV)' };
     scene.add(marsMesh);
     celestialBodies.push(marsMesh);
+    interactableObjects.push(marsMesh);
 
     // 3. JUPITER (Sol V) — Initiatives
     const jupiterRadius = 8.0;
@@ -446,8 +528,10 @@
     });
     jupiterMesh = new THREE.Mesh(jupiterGeo, jupiterMat);
     jupiterMesh.position.set(-25.0, 4.0, -75.0);
+    jupiterMesh.userData = { id: 'jupiter', name: 'Jupiter (Sol V)' };
     scene.add(jupiterMesh);
     celestialBodies.push(jupiterMesh);
+    interactableObjects.push(jupiterMesh);
 
     // 4. SATURN (Sol VI) — Clubs
     saturnGroup = new THREE.Group();
@@ -463,7 +547,9 @@
       metalness: 0.08
     });
     saturnMesh = new THREE.Mesh(saturnGeo, saturnMat);
+    saturnMesh.userData = { id: 'saturn', name: 'Saturn (Sol VI)' };
     saturnGroup.add(saturnMesh);
+    interactableObjects.push(saturnMesh);
 
     // Saturn 3D Rings
     const ringInner = saturnRadius * 1.25;
@@ -507,17 +593,21 @@
     });
     neptuneMesh = new THREE.Mesh(neptuneGeo, neptuneMat);
     neptuneMesh.position.set(-18.0, -4.0, -155.0);
+    neptuneMesh.userData = { id: 'neptune', name: 'Neptune (Sol VIII)' };
     scene.add(neptuneMesh);
     celestialBodies.push(neptuneMesh);
+    interactableObjects.push(neptuneMesh);
 
     // 6. THE MOON (Luna I) — Footer Section
     const footerMoonGeo = new THREE.SphereGeometry(3.5, 48, 48);
     footerMoonMesh = new THREE.Mesh(footerMoonGeo, moonMat);
     footerMoonMesh.position.set(0.0, 0.0, -200.0);
+    footerMoonMesh.userData = { id: 'moon', name: 'The Moon (Luna I)' };
     scene.add(footerMoonMesh);
     celestialBodies.push(footerMoonMesh);
+    interactableObjects.push(footerMoonMesh);
 
-    // Distant Earth hanging in space behind the Moon at footer
+    // Distant Earth behind Moon
     const distantEarthGeo = new THREE.SphereGeometry(1.8, 32, 32);
     const distantEarthMat = new THREE.MeshStandardMaterial({
       map: earthDayTex,
@@ -528,7 +618,6 @@
     distantEarthMesh.position.set(8.0, 4.0, -260.0);
     scene.add(distantEarthMesh);
   }
-
 
   /* --------------------------------------------------------------------------
      Scroll Waypoint Tracking & Interpolation
@@ -541,7 +630,6 @@
 
     const scrollRatio = Math.max(0, Math.min(1, scrollTop / docHeight));
 
-    // Update Right Edge Progress Bar
     const progressTrack = document.getElementById('orbital-progress-bar');
     if (progressTrack) {
       progressTrack.style.height = `${scrollRatio * 100}%`;
@@ -563,7 +651,6 @@
     targetCamPos.lerpVectors(wpA.camPos, wpB.camPos, ease);
     targetLookAt.lerpVectors(wpA.lookAt, wpB.lookAt, ease);
 
-    // Fade out sun flare as user scrolls away from Earth
     if (sunFlareSprite) {
       sunFlareSprite.material.opacity = Math.max(0, 1 - scrollRatio * 3.5);
     }
@@ -603,17 +690,146 @@
   }
 
   /* --------------------------------------------------------------------------
-     Interaction & Event Handlers
+     Raycasting & Interactive 3D Objects
+     -------------------------------------------------------------------------- */
+  function onPointerMove(e) {
+    mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    mousePointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mousePointer, camera);
+    const intersects = raycaster.intersectObjects(interactableObjects, true);
+
+    const hudReticle = document.getElementById('cyber-reticle');
+    const canvas = document.getElementById('webgl-canvas');
+
+    if (intersects.length > 0) {
+      const topObj = intersects[0].object;
+      canvas.style.cursor = 'pointer';
+      if (hudReticle) {
+        hudReticle.style.display = 'block';
+        hudReticle.style.left = `${e.clientX + 15}px`;
+        hudReticle.style.top = `${e.clientY + 15}px`;
+        const objId = topObj.userData.id || 'target';
+        const objName = topObj.userData.name || 'Celestial Body';
+        hudReticle.innerHTML = `<span class="reticle-lock">[LOCKED]</span> <strong>${objName}</strong><br><small>Click to Inspect Dossier</small>`;
+      }
+      if (topObj !== hoveredObject) {
+        hoveredObject = topObj;
+        playTone(740, 0.05, 'triangle');
+      }
+    } else {
+      canvas.style.cursor = isDragging ? 'grabbing' : 'default';
+      if (hudReticle) hudReticle.style.display = 'none';
+      hoveredObject = null;
+    }
+  }
+
+  function onPointerClick(e) {
+    // Only process click if not a long drag
+    raycaster.setFromCamera(mousePointer, camera);
+    const intersects = raycaster.intersectObjects(interactableObjects, true);
+
+    if (intersects.length > 0) {
+      const clicked = intersects[0].object;
+      const dataKey = clicked.userData.id;
+      if (dataKey && PLANET_DATA[dataKey]) {
+        openPlanetDossier(dataKey);
+        playTone(880, 0.12, 'sawtooth');
+      }
+    }
+  }
+
+  function openPlanetDossier(key) {
+    const data = PLANET_DATA[key];
+    if (!data) return;
+
+    const dossier = document.getElementById('planet-dossier');
+    const badgeEl = document.getElementById('dossier-badge');
+    const titleEl = document.getElementById('dossier-title');
+    const metaEl = document.getElementById('dossier-meta');
+    const descEl = document.getElementById('dossier-desc');
+
+    if (badgeEl) badgeEl.textContent = data.badge;
+    if (titleEl) titleEl.textContent = data.name;
+    if (metaEl) metaEl.textContent = data.meta;
+    if (descEl) descEl.textContent = data.desc;
+
+    if (dossier) {
+      dossier.style.display = 'block';
+      dossier.classList.add('active');
+    }
+  }
+
+  function setupDossierControls() {
+    const closeBtn = document.getElementById('close-dossier-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        const dossier = document.getElementById('planet-dossier');
+        if (dossier) {
+          dossier.style.display = 'none';
+          dossier.classList.remove('active');
+        }
+        playTone(400, 0.08, 'sine');
+      });
+    }
+
+    const focusUzbekBtn = document.getElementById('btn-focus-uzbekistan');
+    if (focusUzbekBtn) {
+      focusUzbekBtn.addEventListener('click', () => {
+        openPlanetDossier('beacon');
+        if (earthGroup) {
+          earthGroup.rotation.y = THREE.MathUtils.degToRad(202);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        playTone(980, 0.15, 'triangle');
+      });
+    }
+
+    const toggleOrbitBtn = document.getElementById('btn-toggle-orbit');
+    if (toggleOrbitBtn) {
+      toggleOrbitBtn.addEventListener('click', () => {
+        autoOrbit = !autoOrbit;
+        toggleOrbitBtn.classList.toggle('active', autoOrbit);
+        const textSpan = document.getElementById('orbit-btn-text');
+        if (textSpan) {
+          textSpan.textContent = autoOrbit ? 'Orbit: ON' : 'Orbit: OFF';
+        }
+        playTone(autoOrbit ? 880 : 440, 0.1, 'sine');
+      });
+    }
+
+    const zoomInBtn = document.getElementById('btn-zoom-in');
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', () => {
+        zoomLevel = Math.max(0.6, zoomLevel - 0.15);
+        camera.fov = 45 * zoomLevel;
+        camera.updateProjectionMatrix();
+        playTone(660, 0.08, 'sine');
+      });
+    }
+
+    const zoomOutBtn = document.getElementById('btn-zoom-out');
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', () => {
+        zoomLevel = Math.min(1.4, zoomLevel + 0.15);
+        camera.fov = 45 * zoomLevel;
+        camera.updateProjectionMatrix();
+        playTone(520, 0.08, 'sine');
+      });
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     Event Listeners & Momentum Drag
      -------------------------------------------------------------------------- */
   function setupEvents() {
     window.addEventListener('scroll', updateScrollPosition, { passive: true });
     window.addEventListener('resize', onWindowResize);
-
-    // Mouse movement parallax
-    window.addEventListener('mousemove', (e) => {
-      mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('click', onPointerClick);
 
     // Track Node Clicks
     const trackNodes = document.querySelectorAll('.track-node');
@@ -640,7 +856,7 @@
       });
     }
 
-    // Drag to rotate currently focused planet
+    // Drag to rotate with momentum
     const canvas = document.getElementById('webgl-canvas');
     canvas.addEventListener('mousedown', (e) => {
       isDragging = true;
@@ -657,10 +873,13 @@
       const deltaY = e.clientY - previousPointerPos.y;
       previousPointerPos = { x: e.clientX, y: e.clientY };
 
+      spinVelocityX = deltaX * 0.005;
+      spinVelocityY = deltaY * 0.005;
+
       const activeBody = celestialBodies[WAYPOINTS[currentWaypointIndex].bodyIndex];
       if (activeBody) {
-        activeBody.rotation.y += deltaX * 0.007;
-        activeBody.rotation.x += deltaY * 0.007;
+        activeBody.rotation.y += spinVelocityX;
+        activeBody.rotation.x += spinVelocityY;
       }
     });
 
@@ -670,7 +889,7 @@
         isDragging = true;
         previousPointerPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
-    });
+    }, { passive: true });
 
     window.addEventListener('touchend', () => {
       isDragging = false;
@@ -682,27 +901,28 @@
       const deltaY = e.touches[0].clientY - previousPointerPos.y;
       previousPointerPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 
+      spinVelocityX = deltaX * 0.006;
+      spinVelocityY = deltaY * 0.006;
+
       const activeBody = celestialBodies[WAYPOINTS[currentWaypointIndex].bodyIndex];
       if (activeBody) {
-        activeBody.rotation.y += deltaX * 0.008;
-        activeBody.rotation.x += deltaY * 0.008;
+        activeBody.rotation.y += spinVelocityX;
+        activeBody.rotation.x += spinVelocityY;
       }
-    });
+    }, { passive: true });
 
-    // Audio Mute Toggle Button
     const audioBtn = document.getElementById('audio-btn');
     if (audioBtn) {
       audioBtn.addEventListener('click', toggleAudio);
     }
 
-    // Transmission form handling
     const transForm = document.getElementById('transmission-form');
     if (transForm) {
       transForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const statusBox = document.getElementById('trans-status');
         if (statusBox) {
-          statusBox.textContent = 'TRANSMISSION SENT: Thank you! Your message has beamed to Shahnoza.';
+          statusBox.textContent = 'TRANSMISSION SENT: Tashakkur! Your message has beamed to Shahnoza.';
           statusBox.classList.add('success');
           playTone(920, 0.2, 'triangle');
           transForm.reset();
@@ -796,6 +1016,8 @@
   /* --------------------------------------------------------------------------
      Main Render & Animation Loop
      -------------------------------------------------------------------------- */
+  let beaconTime = 0;
+
   function animate() {
     requestAnimationFrame(animate);
 
@@ -810,20 +1032,37 @@
     camera.position.set(parallaxCamX, parallaxCamY, currentCamPos.z);
     camera.lookAt(currentLookAt);
 
-    // Keep camera light tracking the camera
     if (cameraLight) {
       cameraLight.position.set(camera.position.x + 2, camera.position.y + 4, camera.position.z + 8);
     }
 
-    // Celestial Rotations
-    if (earthMesh) earthMesh.rotation.y += 0.0007;
-    if (cloudsMesh) cloudsMesh.rotation.y += 0.0011;
-    if (heroMoonMesh) heroMoonMesh.rotation.y += 0.0005;
-    if (marsMesh) marsMesh.rotation.y += 0.0009;
-    if (jupiterMesh) jupiterMesh.rotation.y += 0.0014;
-    if (saturnMesh) saturnMesh.rotation.y += 0.0012;
-    if (neptuneMesh) neptuneMesh.rotation.y += 0.0008;
-    if (footerMoonMesh) footerMoonMesh.rotation.y += 0.0005;
+    // Apply Inertia to active planet
+    const activeBody = celestialBodies[WAYPOINTS[currentWaypointIndex].bodyIndex];
+    if (activeBody && !isDragging) {
+      activeBody.rotation.y += spinVelocityX;
+      activeBody.rotation.x += spinVelocityY;
+      spinVelocityX *= 0.94;
+      spinVelocityY *= 0.94;
+    }
+
+    // Animated Uzbekistan Beacon Pulse
+    if (uzbekistanBeaconGroup) {
+      beaconTime += 0.04;
+      const pulseScale = 1.0 + Math.sin(beaconTime) * 0.25;
+      uzbekistanBeaconGroup.children[0].scale.set(pulseScale, pulseScale, 1.0);
+    }
+
+    // Automatic Planetary Orbits (if enabled)
+    if (autoOrbit) {
+      if (earthMesh) earthMesh.rotation.y += 0.0006;
+      if (cloudsMesh) cloudsMesh.rotation.y += 0.001;
+      if (heroMoonMesh) heroMoonMesh.rotation.y += 0.0005;
+      if (marsMesh) marsMesh.rotation.y += 0.0008;
+      if (jupiterMesh) jupiterMesh.rotation.y += 0.0012;
+      if (saturnMesh) saturnMesh.rotation.y += 0.001;
+      if (neptuneMesh) neptuneMesh.rotation.y += 0.0007;
+      if (footerMoonMesh) footerMoonMesh.rotation.y += 0.0005;
+    }
 
     if (starField) starField.rotation.y -= 0.00008;
 
